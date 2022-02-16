@@ -1,84 +1,84 @@
+import { useState } from "react"
 import {
   View,
-  Text,
   TouchableOpacity,
   TextInput,
   StyleSheet,
   Dimensions,
 } from "react-native";
 import { Formik } from "formik";
-import * as Yup from "yup";
 
-const validationSchema = Yup.object().shape({
-  email: Yup.string()
-    .label("Email")
-    .email("Enter a valid email")
-    .required("Please enter a registered email"),
-  password: Yup.string()
-    .label("Password")
-    .required()
-    .min(6, "Password must have at least 6 characters "),
-});
+import { RadioButton, Text } from 'react-native-paper';
 
-const ErrorMessage = ({ errorValue }) => (
-  <View style={styles.errorContainer}>
-    <Text style={styles.errorText}>{errorValue}</Text>
-  </View>
-);
+const vaquitas = [];
 
 export default function App() {
-  function onLoginHandler(values) {
-    const { email, password } = values;
-
-    alert(`Credentials entered. email: ${email}, password: ${password}`);
-  }
-
   return (
     <View style={styles.container}>
       <Formik
-        initialValues={{ email: "", password: "" }}
-        onSubmit={(values, actions) => {
-          onLoginHandler(values, actions);
+        initialValues={{ cuig: "", letra: "", numero: "" }}
+        onSubmit={({ cuig, letra, numero }, actions) => {
+          if (vaquitas.find(vaquita => vaquita.cuig === cuig && vaquita.letra === letra && vaquita.numero === numero)) {
+            alert("VACA DUPLICADA!")
+            return;
+          }
+          vaquitas.push({ cuig, letra, numero })
+          actions.resetForm();
         }}
-        validationSchema={validationSchema}
       >
         {({
           handleChange,
           values,
-          errors,
-          touched,
           handleSubmit,
           handleBlur,
         }) => (
           <>
+            <View><Text>Cantida de vacas ingresadas: {vaquitas.length}.</Text></View>
+            <RadioButton.Group onValueChange={handleChange("cuig")} value={values.cuig}>
+              <View>
+                <Text>EV833</Text>
+                <RadioButton value="EV833" />
+              </View>
+              <View>
+                <Text>EV860</Text>
+                <RadioButton value="EV860" />
+              </View>
+              <View>
+                <Text>EV841</Text>
+                <RadioButton value="EV841" />
+              </View>
+              <View>
+                <Text>EV907</Text>
+                <RadioButton value="EV907" />
+              </View>
+            </RadioButton.Group>
+
+            <RadioButton.Group onValueChange={handleChange("letra")} value={values.letra}>
+              <View>
+                <Text>A</Text>
+                <RadioButton value="A" />
+              </View>
+              <View>
+                <Text>B</Text>
+                <RadioButton value="B" />
+              </View>
+            </RadioButton.Group>
+
             <TextInput
               style={styles.input}
               numberOfLines={1}
-              value={values.email}
-              placeholder="Enter email"
-              onChangeText={handleChange("email")}
+              value={values.numero}
+              placeholder="Numero"
+              onChangeText={handleChange("numero")}
               autoCapitalize="none"
-              autoCompleteType="email"
-              keyboardType="email-address"
-              onBlur={handleBlur("email")}
+              onBlur={handleBlur("numero")}
             />
-            <ErrorMessage errorValue={touched.email && errors.email} />
-            <TextInput
-              style={styles.input}
-              numberOfLines={1}
-              value={values.password}
-              placeholder="Enter password"
-              onChangeText={handleChange("password")}
-              autoCapitalize="none"
-              onBlur={handleBlur("password")}
-              secureTextEntry={true}
-            />
-            <ErrorMessage errorValue={touched.password && errors.password} />
+
             <TouchableOpacity
               onPress={handleSubmit}
               style={styles.buttonContainer}
             >
-              <Text style={styles.buttonText}>Login</Text>
+              <Text style={styles.buttonText}>Ingresar</Text>
             </TouchableOpacity>
           </>
         )}
