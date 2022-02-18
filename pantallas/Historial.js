@@ -48,7 +48,7 @@ export default function App() {
         setData(JSON.parse(dataasync))
       }
     } catch (e) {
-      alert('Failed to fetch the data from storage')
+      alert('Error al leer AsyncStorage')
     }
   }
 
@@ -65,7 +65,7 @@ export default function App() {
               /></Text>
       {data.map((item) => (
         <View style={{ width: width - 10, borderColor: 'black', borderWidth: 1, borderRadius: 5, marginVertical: 5 }}>
-          <Text style={{}}>{item.cuig}</Text>
+          <Text style={{fontWeight: 'bold'}}>{item.cuig}</Text>
           <Text>{item.letra}</Text>
           <Text>{item.numero}</Text>
         </View>

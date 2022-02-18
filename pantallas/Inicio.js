@@ -52,14 +52,14 @@ export default function App() {
           }
           AsyncStorage.getItem('vacas').then((datavacas)=>{
             if (datavacas !== null) {
-              // We have data!!
+              // Si hay data anterior
               const vacas = JSON.parse(datavacas)
               vacas.push(itemvaca)
               AsyncStorage.setItem('vacas',JSON.stringify(vacas));
             }
             else{
               const vacas  = []
-              cart.push(itemvacas)
+              vacas.push(itemvaca)
               AsyncStorage.setItem('vacas',JSON.stringify(vacas));
             }
             alert("Add vacas")
