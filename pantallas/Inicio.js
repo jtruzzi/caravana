@@ -14,6 +14,7 @@ import { Formik } from "formik";
 
 import { RadioButton, Text } from "react-native-paper";
 import { MaterialCommunityIcons } from "react-native-vector-icons";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import tailwind from "tailwind-rn";
 import CustomRadioButton from "../components/CustomRadioButton";
 
@@ -44,6 +45,28 @@ export default function App() {
             return;
           }
           vaquitas.push({ cuig, letra, numero });
+          const itemvaca = {
+            cuig: cuig,
+            letra:  letra,
+            numero: numero
+          }
+          AsyncStorage.getItem('vacas').then((datavacas)=>{
+            if (datavacas !== null) {
+              // We have data!!
+              const vacas = JSON.parse(datavacas)
+              vacas.push(itemvaca)
+              AsyncStorage.setItem('vacas',JSON.stringify(vacas));
+            }
+            else{
+              const vacas  = []
+              cart.push(itemvacas)
+              AsyncStorage.setItem('vacas',JSON.stringify(vacas));
+            }
+            alert("Add vacas")
+          })
+          .catch((err)=>{
+            alert(err)
+          })
           console.log(vaquitas);
           actions.resetForm();
         }}
