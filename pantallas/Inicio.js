@@ -29,7 +29,7 @@ export default function App() {
   const inputNumeroRef = useRef();
 
   return (
-    <ScrollView contentContainerStyle={tailwind("flex bg-white justify-center items-center")}>
+    <ScrollView contentContainerStyle={tailwind("flex-1 bg-white justify-center items-center")}>
       <Formik
         initialValues={{ cuig: "", letra: "", numero: "" }}
         onSubmit={({ cuig, letra, numero }, actions) => {
@@ -62,7 +62,7 @@ export default function App() {
               vacas.push(itemvaca)
               AsyncStorage.setItem('vacas',JSON.stringify(vacas));
             }
-            alert("Add vacas")
+            Alert.alert("Exito!","Vaca agregada")
           })
           .catch((err)=>{
             alert(err)
