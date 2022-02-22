@@ -1,5 +1,5 @@
 
-import { useRef } from "react"
+import { useRef } from "react";
 import {
   ScrollView,
   View,
@@ -17,43 +17,56 @@ import { MaterialCommunityIcons } from "react-native-vector-icons";
 import tailwind from "tailwind-rn";
 import CustomRadioButton from "../components/CustomRadioButton";
 
-let vaquitas = [];
 
-export default function App() {
+export default function Home({ animals, setAnimals }) {
   const handleReset = (formik) => {
+    setAnimals([]);
     formik.resetForm();
     Keyboard.dismiss();
   }
 
-  const inputNumeroRef = useRef();
+  const inputNumberRef = useRef();
+
+  const addCow = ({ code, letter, number, sex }, actions) => {
+    if (!code || !letter || !number) {
+      return;
+    }
+    try {
+      const index = animals.findIndex(
+        (animal) =>
+          animal.code === code &&
+          animal.letter === letter &&
+          animal.number === number
+      );
+      if (index !== -1) {
+        Alert.alert("ATENCION!", `ANIMAL DUPLICADO en posición ${index}!`);
+        return;
+      }
+      setAnimals(animals => [...animals, { code, letter, number, sex }])
+      actions.resetForm();
+    }
+    catch (err) {
+      console.info({ err })
+    }
+  }
 
   return (
     <ScrollView contentContainerStyle={tailwind("flex bg-white justify-center items-center")}>
       <Formik
-        initialValues={{ cuig: "", letra: "", numero: "" }}
-        onSubmit={({ cuig, letra, numero }, actions) => {
-          if (
-            vaquitas.find(
-              (vaquita) =>
-                vaquita.cuig === cuig &&
-                vaquita.letra === letra &&
-                vaquita.numero === numero
-            )
-          ) {
-            Alert.alert("ATENCION!", "VACA DUPLICADA!");
-            return;
-          }
-          vaquitas.push({ cuig, letra, numero });
-          console.log(vaquitas);
-          actions.resetForm();
-        }}
+        initialValues={{ code: "", letter: "", sex: "", number: "" }}
+        onSubmit={addCow}
       >
         {(formik) => (
           <>
+            <View>
+              <View style={tailwind("w-10 h-10 border-2 flex items-center justify-center")}>
+                <Text style={tailwind("text-4xl")}>{animals.length}</Text>
+              </View>
+            </View>
             <Text style={tailwind("text-xl")}>CUIG</Text>
             <RadioButton.Group
-              onValueChange={formik.handleChange("cuig")}
-              value={formik.values.cuig}
+              onValueChange={formik.handleChange("code")}
+              value={formik.values.code}
             >
               <View
                 style={{
@@ -77,22 +90,44 @@ export default function App() {
               </View>
             </RadioButton.Group>
 
-            <Text style={tailwind("text-xl")}>LETRA</Text>
-            <RadioButton.Group
-              onValueChange={formik.handleChange("letra")}
-              value={formik.values.letra}
-            >
-              <View
-                style={{
-                  flexDirection: "row",
-                  borderRadius: 5,
-                  padding: 5,
-                }}
-              >
-                <CustomRadioButton title="A" value="A" />
-                <CustomRadioButton title="B" value="B" />
+            <View style={tailwind("flex-row")}>
+              <View style={tailwind("items-center")}>
+                <Text style={tailwind("text-xl")}>LETRA</Text>
+                <RadioButton.Group
+                  onValueChange={formik.handleChange("letter")}
+                  value={formik.values.letter}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      borderRadius: 5,
+                      padding: 5,
+                    }}
+                  >
+                    <CustomRadioButton title="A" value="A" />
+                    <CustomRadioButton title="B" value="B" />
+                  </View>
+                </RadioButton.Group>
               </View>
-            </RadioButton.Group>
+              <View style={tailwind("items-center")}>
+                <Text style={tailwind("text-xl")}>SEXO</Text>
+                <RadioButton.Group
+                  onValueChange={formik.handleChange("sex")}
+                  value={formik.values.sex}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      borderRadius: 5,
+                      padding: 5,
+                    }}
+                  >
+                    <CustomRadioButton title="M" value="M" />
+                    <CustomRadioButton title="F" value="F" />
+                  </View>
+                </RadioButton.Group>
+              </View>
+            </View>
             <Text style={tailwind("text-xl")}>NÚMERO</Text>
             <View
               style={{
@@ -104,10 +139,10 @@ export default function App() {
               }}
             >
               <MaterialCommunityIcons
-                name={formik.values.numero ? "cow" : "feature-search-outline"}
+                name={formik.values.number ? "cow" : "feature-search-outline"}
                 size={45}
                 color="white"
-                onPress={() => inputNumeroRef.current.focus()}
+                onPress={() => inputNumberRef.current.focus()}
               />
               <SmoothPinCodeInput
                 cellStyle={{
@@ -121,9 +156,9 @@ export default function App() {
                   color: 'white',
                   fontSize: 24
                 }}
-                ref={inputNumeroRef}
-                value={formik.values.numero}
-                onTextChange={formik.handleChange('numero')}
+                ref={inputNumberRef}
+                value={formik.values.number}
+                onTextChange={formik.handleChange('number')}
                 onFulfill={() => { formik.submitForm(); Keyboard.dismiss() }}
               />
             </View>
@@ -132,14 +167,14 @@ export default function App() {
               <Text style={tailwind("text-lg text-white")}>Ingresar</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => {
-              handleReset(formik); vaquitas = [];
+              handleReset(formik);
             }} style={tailwind("justify-center items-center p-4 w-4/5 rounded bg-red-600 my-2")}>
               <Text style={tailwind("text-lg text-white")}>Limpiar</Text>
             </TouchableOpacity>
           </>
         )}
       </Formik>
-    </ScrollView >
+    </ScrollView>
   );
 }
 
