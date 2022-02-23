@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Modal,
+  Alert,
 } from "react-native";
 
 import { Text } from "react-native-paper";
@@ -17,14 +18,14 @@ const width = Dimensions.get("window").width;
 
 export default function App() {
   const [modalVisible, setModalVisible] = useState(false);
-  const [data, setData] = useState([]);
+  const [animals, setAnimals] = useState([]);
 
-  const readData = async () => {
+  const readStorage = async () => {
     try {
-      const dataasync = await AsyncStorage.getItem("vacas");
+      const dataasync = await AsyncStorage.getItem("animals");
 
       if (dataasync !== null) {
-        setData(JSON.parse(dataasync));
+        setAnimals([...JSON.parse(dataasync)]);
       }
     } catch (e) {
       alert("Error al leer AsyncStorage");
@@ -32,7 +33,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    readData();
+    readStorage();
   });
 
   return (
@@ -42,7 +43,6 @@ export default function App() {
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => {
-          Alert.alert("Modal has been closed.");
           setModalVisible(!modalVisible);
         }}
       >
@@ -87,7 +87,7 @@ export default function App() {
       </Modal>
       <View
         style={{
-          width: Dimensions.get("window").width,
+          width: "100%",
           alignItems: "center",
           backgroundColor: "white",
           justifyContent: "center",
@@ -101,45 +101,52 @@ export default function App() {
           }}
         >
           <Text style={{ fontSize: 40, fontWeight: "bold" }}>
-            {data.length}
+            {animals.length}
             <MaterialCommunityIcons name={"cow"} size={45} color="#900" />
           </Text>
-          {data.map((item, i) => (
+          {animals.reverse().map((animal, index) => (
             <View
-              key={i}
+              key={index}
               style={tailwind(
-                "justify-center items-center p-4 w-4/5 rounded bg-green-400 my-2"
+                "justify-center items-center rounded bg-green-400 my-2 w-full"
               )}
             >
-              <Text style={{ fontWeight: "bold" }}>{item.cuig}</Text>
-              <Text>{item.letra}</Text>
-              <Text>{item.numero}</Text>
+              <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                <View>
+                  <Text style={{ color: "black", fontSize: 40, margin: 10 }}>{animals.length - index}</Text>
+                </View>
+                <View style={{ margin: 10, borderColor: 'black', display: "flex", alignItems: "center" }}>
+                  <Text style={{ fontSize: 35 }}>{animal.code} ({animal.sex})</Text>
+                  <Text style={{ fontSize: 35 }}>{animal.letter}{animal.number.substring(0, 3)}
+                    <Text style={{ fontSize: 25, color: "#900" }}>{animal.number.substring(3, 4)}</Text>
+                  </Text>
+                </View>
+              </View>
             </View>
           ))}
-          {data.length != 0 ? <View style={{width: width, alignItems: 'center'}}>
-          <TouchableOpacity
-            onPress={() => {
-              setModalVisible(!modalVisible);
-            }}
-            style={tailwind(
-              "justify-center items-center p-4 w-4/5 rounded bg-green-600 my-2"
-            )}
-          >
-            <Text style={tailwind("text-lg text-white")}>
-              <MaterialCommunityIcons name={"email"} size={21} /> Enviar{" "}
-              <MaterialCommunityIcons name={"email"} size={21} />
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              AsyncStorage.setItem("vacas", JSON.stringify([]));
-            }}
-            style={tailwind(
-              "justify-center items-center p-4 w-4/5 rounded bg-red-600 my-2"
-            )}
-          >
-            <Text style={tailwind("text-lg text-white")}>Limpiar</Text>
-          </TouchableOpacity></View> : null}
+          {animals.length != 0 ? <View style={{ width: width, alignItems: 'center' }}>
+            <TouchableOpacity
+              onPress={() => {
+                setModalVisible(!modalVisible);
+              }}
+              style={tailwind(
+                "justify-center items-center p-4 w-4/5 rounded bg-green-600 my-2"
+              )}
+            >
+              <Text style={tailwind("text-lg text-white")}>
+                EXPORTAR DATOS{" "}<MaterialCommunityIcons name={"download"} size={21} />
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                AsyncStorage.setItem("animals", JSON.stringify([]));
+              }}
+              style={tailwind(
+                "justify-center items-center p-4 w-4/5 rounded bg-red-600 my-2"
+              )}
+            >
+              <Text style={tailwind("text-lg text-white")}>Comenzar nuevo conteo</Text>
+            </TouchableOpacity></View> : null}
         </ScrollView>
       </View>
     </View>
