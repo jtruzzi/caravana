@@ -20,6 +20,7 @@ import * as FileSystem from 'expo-file-system';
 import ExcelJS from 'exceljs';
 // Share excel via share dialog
 import * as Sharing from 'expo-sharing';
+import { Buffer as NodeBuffer } from 'buffer';
 
 const width = Dimensions.get("window").width;
 
