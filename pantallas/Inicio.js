@@ -142,7 +142,7 @@ const Inicio = () => {
                     }}
                   >
                     <CustomRadioButton title="M" value="M" />
-                    <CustomRadioButton title="F" value="F" />
+                    <CustomRadioButton title="H" value="H" />
                   </View>
                 </RadioButton.Group>
               </View>
@@ -154,7 +154,6 @@ const Inicio = () => {
                 backgroundColor: "#900",
                 padding: 5,
                 borderRadius: 5,
-                marginTop: 10,
               }}
             >
               <MaterialCommunityIcons
