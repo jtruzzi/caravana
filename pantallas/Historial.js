@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Modal,
-  Alert,
+  Clipboard,
 } from "react-native";
 
 import { Text } from "react-native-paper";
@@ -49,63 +49,81 @@ export default function App() {
     const fileName = 'YourFilename.xlsx';
     const fileUri = FileSystem.cacheDirectory + fileName;
     return new Promise((resolve, reject) => {
-        const workbook = new ExcelJS.Workbook();
-        workbook.creator = 'Me';
-        workbook.created = now;
-        workbook.modified = now;
-        // Add a sheet to work on
-        const worksheet = workbook.addWorksheet('My Sheet', {});
-        // Just some columns as used on ExcelJS Readme
-        worksheet.columns = [
-            { header: 'Id', key: 'id', width: 10 },
-            { header: 'Name', key: 'name', width: 32 },
-            { header: 'D.O.B.', key: 'dob', width: 10, }
-        ];
-        // Add some test data
-        worksheet.addRow({ id: 1, name: 'John Doe', dob: new Date(1970, 1, 1) });
-        worksheet.addRow({ id: 2, name: 'Jane Doe', dob: new Date(1969, 2, 3) });
-        // Test styling
-        // Style first row
-        worksheet.getRow(1).font = {
-            name: 'Comic Sans MS', family: 4, size: 16, underline: 'double', bold: true
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'Me';
+      workbook.created = now;
+      workbook.modified = now;
+      // Add a sheet to work on
+      const worksheet = workbook.addWorksheet('My Sheet', {});
+      // Just some columns as used on ExcelJS Readme
+      worksheet.columns = [
+        { header: 'Id', key: 'id', width: 10 },
+        { header: 'Name', key: 'name', width: 32 },
+        { header: 'D.O.B.', key: 'dob', width: 10, }
+      ];
+      // Add some test data
+      worksheet.addRow({ id: 1, name: 'John Doe', dob: new Date(1970, 1, 1) });
+      worksheet.addRow({ id: 2, name: 'Jane Doe', dob: new Date(1969, 2, 3) });
+      // Test styling
+      // Style first row
+      worksheet.getRow(1).font = {
+        name: 'Comic Sans MS', family: 4, size: 16, underline: 'double', bold: true
+      };
+      // Style second column
+      worksheet.eachRow((row, rowNumber) => {
+        row.getCell(2).font = {
+          name: 'Arial Black',
+          color: { argb: 'FF00FF00' },
+          family: 2,
+          size: 14,
+          bold: true
         };
-        // Style second column
-        worksheet.eachRow((row, rowNumber) => {
-            row.getCell(2).font = {
-                name: 'Arial Black',
-                color: { argb: 'FF00FF00' },
-                family: 2,
-                size: 14,
-                bold: true
-            };
+      });
+      // Write to file
+      workbook.xlsx.writeBuffer().then((buffer) => {
+        // Do this to use base64 encoding
+        const nodeBuffer = NodeBuffer.from(buffer);
+        const bufferStr = nodeBuffer.toString('base64');
+        FileSystem.writeAsStringAsync(fileUri, bufferStr, {
+          encoding: FileSystem.EncodingType.Base64
+        }).then(() => {
+          resolve(fileUri);
         });
-        // Write to file
-        workbook.xlsx.writeBuffer().then((buffer) => {
-            // Do this to use base64 encoding
-            const nodeBuffer = NodeBuffer.from(buffer);
-            const bufferStr = nodeBuffer.toString('base64');
-            FileSystem.writeAsStringAsync(fileUri, bufferStr, {
-                encoding: FileSystem.EncodingType.Base64
-            }).then(() => {
-                resolve(fileUri);
-            });
-        });
+      });
     });
-};
-const shareExcel = async () => {
+  };
+  const shareExcel = async () => {
     const shareableExcelUri = await generateShareableExcel();
     Sharing.shareAsync(shareableExcelUri, {
-        mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        dialogTitle: 'Your dialog title here',
-        UTI: 'com.microsoft.excel.xlsx' // iOS
+      mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      dialogTitle: 'Your dialog title here',
+      UTI: 'com.microsoft.excel.xlsx' // iOS
     }).catch(error => {
-        console.error('Error', error);
+      console.error('Error', error);
     }).then(() => {
-        console.log('Return from sharing dialog');
+      console.log('Return from sharing dialog');
     });
-};
+  };
 
+  const convertArrayToCSV = () => {
+    const csvString = [
+      [
+        "CUIG",
+        "Letra",
+        "Sexo",
+        "Numero",
+      ],
+      ...animals.map(animal => [
+        animal.code,
+        animal.letter,
+        animal.sex,
+        animal.number
+      ])
+    ].map(e => e.join(","))
+      .join("\n");;
 
+    return csvString
+  }
 
   return (
     <View style={styles.container}>
@@ -126,20 +144,19 @@ const shareExcel = async () => {
             <View
               style={tailwind("bg-white w-full p-6 rounded-lg items-center")}
             >
-              <MaterialCommunityIcons
-                name={"bookmark-check"}
-                size={58}
-                color="#900"
-              />
-
               <Text style={tailwind("text-gray-800 text-xl font-medium mt-4")}>
-                ¡Datos enviados!
+                Lista de animales
               </Text>
 
-              <Text style={tailwind("text-gray-600 text-center mt-2 w-56")}>
-                ¡Revisa tu casilla de email!
-              </Text>
-
+              <View
+                style={{
+                  backgroundColor: '#FFFFFF',
+                  borderBottomColor: '#000000',
+                  borderBottomWidth: 1,
+                  height: 300,
+                }}>
+                <Text selectable={true}>{convertArrayToCSV(animals)}</Text>
+              </View>
               <TouchableOpacity
                 onPress={() => {
                   setModalVisible(!modalVisible);
@@ -149,7 +166,7 @@ const shareExcel = async () => {
                 )}
               >
                 <Text style={tailwind("text-white font-medium")}>
-                  Volver atras!
+                  Cerrar
                 </Text>
               </TouchableOpacity>
             </View>
@@ -198,7 +215,7 @@ const shareExcel = async () => {
           {animals.length != 0 ? <View style={{ width: width, alignItems: 'center' }}>
             <TouchableOpacity
               onPress={
-                shareExcel
+                () => setModalVisible(!modalVisible)
               }
               style={tailwind(
                 "justify-center items-center p-4 w-4/5 rounded bg-green-600 my-2"

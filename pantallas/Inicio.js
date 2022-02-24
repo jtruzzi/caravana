@@ -36,7 +36,7 @@ const Inicio = () => {
       <Formik
         initialValues={{ code: "", letter: "", number: "", sex: "" }}
         onSubmit={({ code, letter, number, sex }, actions) => {
-          if (!code || !letter || !number) {
+          if (!code || !letter || !number || !sex) {
             Alert.alert("Faltan rellenar campos");
             return;
           }
@@ -46,7 +46,8 @@ const Inicio = () => {
               (vaquita) =>
                 vaquita.code === code &&
                 vaquita.letter === letter &&
-                vaquita.number === number
+                vaquita.number === number &&
+                vaquita.sex === sex
             );
             if (index !== -1) {
               Alert.alert("ATENCION!", `ANIMAL DUPLICADO en posición ${index + 1}!`);
@@ -142,7 +143,7 @@ const Inicio = () => {
                     }}
                   >
                     <CustomRadioButton title="M" value="M" />
-                    <CustomRadioButton title="F" value="F" />
+                    <CustomRadioButton title="H" value="H" />
                   </View>
                 </RadioButton.Group>
               </View>
@@ -154,7 +155,6 @@ const Inicio = () => {
                 backgroundColor: "#900",
                 padding: 5,
                 borderRadius: 5,
-                marginTop: 10,
               }}
             >
               <MaterialCommunityIcons
