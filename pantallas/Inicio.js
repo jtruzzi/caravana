@@ -1,7 +1,7 @@
-
 import { useRef } from "react"
 import {
   ScrollView,
+  CheckBox,
   View,
   TouchableOpacity,
   StyleSheet,
@@ -34,8 +34,8 @@ const Inicio = () => {
   return (
     <ScrollView contentContainerStyle={tailwind("flex-1 bg-white justify-start items-center")}>
       <Formik
-        initialValues={{ code: "", letter: "", number: "", sex: "" }}
-        onSubmit={({ code, letter, number, sex }, actions) => {
+        initialValues={{ code: "", letter: "", number: "", sex: "", other: "false" }}
+        onSubmit={({ code, letter, number, sex, other }, actions) => {
           if (!code || !letter || !number || !sex) {
             Alert.alert("Faltan rellenar campos");
             return;
@@ -47,7 +47,8 @@ const Inicio = () => {
                 vaquita.code === code &&
                 vaquita.letter === letter &&
                 vaquita.number === number &&
-                vaquita.sex === sex
+                vaquita.sex === sex &&
+                vaquita.other === other
             );
             if (index !== -1) {
               Alert.alert("ATENCION!", `ANIMAL DUPLICADO en posición ${index + 1}!`);
@@ -58,6 +59,7 @@ const Inicio = () => {
               letter,
               number,
               sex,
+              other,
             }
             AsyncStorage.getItem('animals').then((datavacas) => {
               if (datavacas !== null) {
@@ -178,9 +180,26 @@ const Inicio = () => {
                 ref={inputNumberRef}
                 value={formik.values.number}
                 onTextChange={formik.handleChange('number')}
-                onFulfill={() => { formik.submitForm(); Keyboard.dismiss() }}
+                onFulfill={() => { Keyboard.dismiss() }}
               />
             </View>
+            <View style={tailwind("items-center")}>
+                <RadioButton.Group
+                  onValueChange={formik.handleChange("other")}
+                  value={formik.values.other}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      borderRadius: 5,
+                      padding: 5,
+                    }}
+                  >
+                    <CustomRadioButton title="Otro?" value="true" />
+                  </View>
+                </RadioButton.Group>
+              </View>
+
 
             <TouchableOpacity onPress={formik.handleSubmit} style={tailwind("justify-center items-center p-4 w-4/5 rounded bg-green-600 my-2")}>
               <Text style={tailwind("text-lg text-white")}>Ingresar</Text>

@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Modal,
-  Clipboard,
+  Alert,
 } from "react-native";
 
 import { Text } from "react-native-paper";
@@ -46,7 +46,7 @@ export default function App() {
 
   const generateShareableExcel = async () => {
     const now = new Date();
-    const fileName = 'YourFilename.xlsx';
+    const fileName = `Conteo-${now.toISOString().split('T')}.xlsx`;
     const fileUri = FileSystem.cacheDirectory + fileName;
     return new Promise((resolve, reject) => {
       const workbook = new ExcelJS.Workbook();
@@ -54,31 +54,19 @@ export default function App() {
       workbook.created = now;
       workbook.modified = now;
       // Add a sheet to work on
-      const worksheet = workbook.addWorksheet('My Sheet', {});
+      const worksheet = workbook.addWorksheet('Conteo', {});
       // Just some columns as used on ExcelJS Readme
       worksheet.columns = [
-        { header: 'Id', key: 'id', width: 10 },
-        { header: 'Name', key: 'name', width: 32 },
-        { header: 'D.O.B.', key: 'dob', width: 10, }
+        { header: 'CUIGLetraNumero', key: 'code' },
+        { header: 'Sexo', key: 'sex' },
+        { header: 'Otro', key: 'other' }
       ];
+
       // Add some test data
-      worksheet.addRow({ id: 1, name: 'John Doe', dob: new Date(1970, 1, 1) });
-      worksheet.addRow({ id: 2, name: 'Jane Doe', dob: new Date(1969, 2, 3) });
-      // Test styling
-      // Style first row
-      worksheet.getRow(1).font = {
-        name: 'Comic Sans MS', family: 4, size: 16, underline: 'double', bold: true
-      };
-      // Style second column
-      worksheet.eachRow((row, rowNumber) => {
-        row.getCell(2).font = {
-          name: 'Arial Black',
-          color: { argb: 'FF00FF00' },
-          family: 2,
-          size: 14,
-          bold: true
-        };
+      animals.forEach((animal, index) => {
+        worksheet.addRow({ code: `${animal.code}${animal.letter}${animal.number}`, sex: animal.sex, other: animal.other ? "SI" : "NO" });
       });
+
       // Write to file
       workbook.xlsx.writeBuffer().then((buffer) => {
         // Do this to use base64 encoding
@@ -96,28 +84,25 @@ export default function App() {
     const shareableExcelUri = await generateShareableExcel();
     Sharing.shareAsync(shareableExcelUri, {
       mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      dialogTitle: 'Your dialog title here',
+      dialogTitle: 'Exportar',
       UTI: 'com.microsoft.excel.xlsx' // iOS
     }).catch(error => {
+      Alert.alert("Error al compartir el archivo")
       console.error('Error', error);
-    }).then(() => {
-      console.log('Return from sharing dialog');
-    });
+    })
   };
 
   const convertArrayToCSV = () => {
     const csvString = [
       [
-        "CUIG",
-        "Letra",
+        "CUIGLetraNumero",
         "Sexo",
-        "Numero",
+        "Otro",
       ],
       ...animals.map(animal => [
-        animal.code,
-        animal.letter,
+        `${animal.code}${animal.letter}${animal.number}`,
         animal.sex,
-        animal.number
+        animal.other ? "SI" : "NO",
       ])
     ].map(e => e.join(","))
       .join("\n");;
@@ -196,7 +181,7 @@ export default function App() {
             <View
               key={index}
               style={tailwind(
-                "justify-center items-center rounded bg-green-400 my-2 w-full"
+                `justify-center items-center rounded ${animal.other ? "bg-red-400" : "bg-green-400"} my-2 w-full`
               )}
             >
               <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
@@ -215,7 +200,7 @@ export default function App() {
           {animals.length != 0 ? <View style={{ width: width, alignItems: 'center' }}>
             <TouchableOpacity
               onPress={
-                () => setModalVisible(!modalVisible)
+                shareExcel
               }
               style={tailwind(
                 "justify-center items-center p-4 w-4/5 rounded bg-green-600 my-2"
