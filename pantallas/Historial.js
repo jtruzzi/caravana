@@ -46,7 +46,7 @@ export default function App() {
 
   const generateShareableExcel = async () => {
     const now = new Date();
-    const fileName = `Conteo-${now.toISOString().split('T')}.xlsx`;
+    const fileName = `caravana-conteo-${now.toISOString().split('T')[0]}.xlsx`;
     const fileUri = FileSystem.cacheDirectory + fileName;
     return new Promise((resolve, reject) => {
       const workbook = new ExcelJS.Workbook();
@@ -57,14 +57,13 @@ export default function App() {
       const worksheet = workbook.addWorksheet('Conteo', {});
       // Just some columns as used on ExcelJS Readme
       worksheet.columns = [
-        { header: 'CUIGLetraNumero', key: 'code' },
-        { header: 'Sexo', key: 'sex' },
-        { header: 'Otro', key: 'other' }
+        { header: 'CUIGLetraNumero', key: 'code', width: 50 },
+        { header: 'Sexo', key: 'sex' }
       ];
 
       // Add some test data
       animals.forEach((animal, index) => {
-        worksheet.addRow({ code: `${animal.code}${animal.letter}${animal.number}`, sex: animal.sex, other: animal.other ? "SI" : "NO" });
+        worksheet.addRow({ code: `${animal.code}${animal.letter}${animal.number}`, sex: animal.sex });
       });
 
       // Write to file
@@ -92,27 +91,25 @@ export default function App() {
     })
   };
 
-  const convertArrayToCSV = () => {
-    const csvString = [
-      [
-        "CUIGLetraNumero",
-        "Sexo",
-        "Otro",
-      ],
-      ...animals.map(animal => [
-        `${animal.code}${animal.letter}${animal.number}`,
-        animal.sex,
-        animal.other ? "SI" : "NO",
-      ])
-    ].map(e => e.join(","))
-      .join("\n");;
+  // const convertArrayToCSV = () => {
+  //   const csvString = [
+  //     [
+  //       "CUIGLetraNumero",
+  //       "Sexo",
+  //     ],
+  //     ...animals.map(animal => [
+  //       `${animal.code}${animal.letter}${animal.number}`,
+  //       animal.sex,
+  //     ])
+  //   ].map(e => e.join(","))
+  //     .join("\n");;
 
-    return csvString
-  }
+  //   return csvString
+  // }
 
   return (
     <View style={styles.container}>
-      <Modal
+      {/* <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
@@ -157,7 +154,7 @@ export default function App() {
             </View>
           </View>
         </View>
-      </Modal>
+      </Modal> */}
       <View
         style={{
           width: "100%",
@@ -181,7 +178,7 @@ export default function App() {
             <View
               key={index}
               style={tailwind(
-                `justify-center items-center rounded ${animal.other ? "bg-red-400" : "bg-green-400"} my-2 w-full`
+                `justify-center items-center rounded bg-green-400 my-2 w-full`
               )}
             >
               <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
@@ -189,7 +186,7 @@ export default function App() {
                   <Text style={{ color: "black", fontSize: 40, margin: 10 }}>{animals.length - index}</Text>
                 </View>
                 <View style={{ margin: 10, borderColor: 'black', display: "flex", alignItems: "center" }}>
-                  <Text style={{ fontSize: 35 }}>{animal.code} ({animal.sex})</Text>
+                  <Text style={{ fontSize: 35 }}>{animal.code || "---"} ({animal.sex})</Text>
                   <Text style={{ fontSize: 35 }}>{animal.letter}{animal.number.substring(0, 3)}
                     <Text style={{ fontSize: 25, color: "#900" }}>{animal.number.substring(3, 4)}</Text>
                   </Text>

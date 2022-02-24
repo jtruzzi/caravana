@@ -1,7 +1,6 @@
 import { useRef } from "react"
 import {
   ScrollView,
-  CheckBox,
   View,
   TouchableOpacity,
   StyleSheet,
@@ -36,7 +35,7 @@ const Inicio = () => {
       <Formik
         initialValues={{ code: "", letter: "", number: "", sex: "", other: "false" }}
         onSubmit={({ code, letter, number, sex, other }, actions) => {
-          if (!code || !letter || !number || !sex) {
+          if ((other == "false" && !code) || !letter || !number || !sex) {
             Alert.alert("Faltan rellenar campos");
             return;
           }
@@ -47,8 +46,7 @@ const Inicio = () => {
                 vaquita.code === code &&
                 vaquita.letter === letter &&
                 vaquita.number === number &&
-                vaquita.sex === sex &&
-                vaquita.other === other
+                vaquita.sex === sex
             );
             if (index !== -1) {
               Alert.alert("ATENCION!", `ANIMAL DUPLICADO en posición ${index + 1}!`);
@@ -83,109 +81,116 @@ const Inicio = () => {
           });
         }}
       >
-        {(formik) => (
-          <>
-            <Text style={tailwind("text-xl")}>CUIG</Text>
-            <RadioButton.Group
-              onValueChange={formik.handleChange("code")}
-              value={formik.values.code}
-            >
-              <View
-                style={{
-                  flexDirection: "row",
-                  borderColor: "black",
-                  padding: 5,
-                }}
+        {(formik) => {
+          return (
+            <>
+              <Text style={tailwind("text-xl")}>CUIG</Text>
+              <RadioButton.Group
+                onValueChange={formik.handleChange("code")}
+                value={formik.values.code}
               >
-                <CustomRadioButton title="EV833" value="EV833" />
-                <CustomRadioButton title="EV860" value="EV860" />
-              </View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  borderColor: "black",
-                  padding: 5,
-                }}
-              >
-                <CustomRadioButton title="EV841" value="EV841" />
-                <CustomRadioButton title="EV907" value="EV907" />
-              </View>
-            </RadioButton.Group>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    borderColor: "black",
+                    padding: 5,
+                  }}
+                >
+                  <CustomRadioButton title="EV833" value="EV833" />
+                  <CustomRadioButton title="EV860" value="EV860" />
+                </View>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    borderColor: "black",
+                    padding: 5,
+                  }}
+                >
+                  <CustomRadioButton title="EV841" value="EV841" />
+                  <CustomRadioButton title="EV907" value="EV907" />
+                </View>
+              </RadioButton.Group>
 
-            <View style={tailwind("flex-row")}>
-              <View style={tailwind("items-center")}>
-                <Text style={tailwind("text-xl")}>LETRA</Text>
-                <RadioButton.Group
-                  onValueChange={formik.handleChange("letter")}
-                  value={formik.values.letter}
-                >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      borderRadius: 5,
-                      padding: 5,
-                    }}
+              <View style={tailwind("flex-row")}>
+                <View style={tailwind("items-center")}>
+                  <Text style={tailwind("text-xl")}>LETRA</Text>
+                  <RadioButton.Group
+                    onValueChange={formik.handleChange("letter")}
+                    value={formik.values.letter}
                   >
-                    <CustomRadioButton title="A" value="A" />
-                    <CustomRadioButton title="B" value="B" />
-                  </View>
-                </RadioButton.Group>
-              </View>
-              <View style={tailwind("items-center")}>
-                <Text style={tailwind("text-xl")}>SEXO</Text>
-                <RadioButton.Group
-                  onValueChange={formik.handleChange("sex")}
-                  value={formik.values.sex}
-                >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      borderRadius: 5,
-                      padding: 5,
-                    }}
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        borderRadius: 5,
+                        padding: 5,
+                      }}
+                    >
+                      <CustomRadioButton title="A" value="A" />
+                      <CustomRadioButton title="B" value="B" />
+                    </View>
+                  </RadioButton.Group>
+                </View>
+                <View style={tailwind("items-center")}>
+                  <Text style={tailwind("text-xl")}>SEXO</Text>
+                  <RadioButton.Group
+                    onValueChange={formik.handleChange("sex")}
+                    value={formik.values.sex}
                   >
-                    <CustomRadioButton title="M" value="M" />
-                    <CustomRadioButton title="H" value="H" />
-                  </View>
-                </RadioButton.Group>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        borderRadius: 5,
+                        padding: 5,
+                      }}
+                    >
+                      <CustomRadioButton title="M" value="M" />
+                      <CustomRadioButton title="H" value="H" />
+                    </View>
+                  </RadioButton.Group>
+                </View>
               </View>
-            </View>
-            <Text style={tailwind("text-xl")}>NÚMERO</Text>
-            <View
-              style={{
-                flexDirection: "row",
-                backgroundColor: "#900",
-                padding: 5,
-                borderRadius: 5,
-              }}
-            >
-              <MaterialCommunityIcons
-                name={formik.values.number ? "cow" : "feature-search-outline"}
-                size={45}
-                color="white"
-                onPress={() => inputNumberRef.current.focus()}
-              />
-              <SmoothPinCodeInput
-                cellStyle={{
-                  borderBottomWidth: 2,
-                  borderColor: 'white',
+              <Text style={tailwind("text-xl")}>NÚMERO</Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  backgroundColor: "#900",
+                  padding: 5,
+                  borderRadius: 5,
                 }}
-                cellStyleFocused={{
-                  borderColor: 'white',
-                }}
-                textStyle={{
-                  color: 'white',
-                  fontSize: 24
-                }}
-                ref={inputNumberRef}
-                value={formik.values.number}
-                onTextChange={formik.handleChange('number')}
-                onFulfill={() => { Keyboard.dismiss() }}
-              />
-            </View>
-            <View style={tailwind("items-center")}>
+              >
+                <MaterialCommunityIcons
+                  name={formik.values.number ? "cow" : "feature-search-outline"}
+                  size={45}
+                  color="white"
+                  onPress={() => inputNumberRef.current.focus()}
+                />
+                <SmoothPinCodeInput
+                  cellStyle={{
+                    borderBottomWidth: 2,
+                    borderColor: 'white',
+                  }}
+                  cellStyleFocused={{
+                    borderColor: 'white',
+                  }}
+                  textStyle={{
+                    color: 'white',
+                    fontSize: 24
+                  }}
+                  ref={inputNumberRef}
+                  value={formik.values.number}
+                  onTextChange={formik.handleChange('number')}
+                  onFulfill={() => { Keyboard.dismiss() }}
+                />
+              </View>
+              <Text style={tailwind("text-xl")}>ES OTRO?</Text>
+              <View style={tailwind("items-center")}>
                 <RadioButton.Group
-                  onValueChange={formik.handleChange("other")}
+                  onValueChange={(value) => {
+                    formik.setFieldValue("other", value)
+                    if (value === "true") {
+                      formik.setFieldValue("code", "")
+                    }
+                  }}
                   value={formik.values.other}
                 >
                   <View
@@ -195,22 +200,24 @@ const Inicio = () => {
                       padding: 5,
                     }}
                   >
-                    <CustomRadioButton title="Otro?" value="true" />
+                    <CustomRadioButton title="SI" value="true" />
+                    <CustomRadioButton title="NO" value="false" />
                   </View>
                 </RadioButton.Group>
               </View>
 
 
-            <TouchableOpacity onPress={formik.handleSubmit} style={tailwind("justify-center items-center p-4 w-4/5 rounded bg-green-600 my-2")}>
-              <Text style={tailwind("text-lg text-white")}>Ingresar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={formik.resetForm} style={tailwind("justify-center items-center p-2 w-4/5 rounded bg-red-600 my-2")}>
-              <Text style={tailwind("text-lg text-white")}>Limpiar formulario</Text>
-            </TouchableOpacity>
-          </>
-        )}
+              <TouchableOpacity onPress={formik.handleSubmit} style={tailwind("justify-center items-center p-4 w-4/5 rounded bg-green-600 my-2")}>
+                <Text style={tailwind("text-lg text-white")}>Ingresar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={formik.resetForm} style={tailwind("justify-center items-center p-2 w-4/5 rounded bg-red-600 my-2")}>
+                <Text style={tailwind("text-lg text-white")}>Limpiar formulario</Text>
+              </TouchableOpacity>
+            </>
+          )
+        }}
       </Formik>
-    </ScrollView>
+    </ScrollView >
   );
 }
 
