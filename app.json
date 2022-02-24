@@ -1,0 +1,12 @@
+{
+    "expo": {
+      "name": "Caravana",
+      "description": "Contador de ganado",
+      "ios": {
+        "supportsTablet": true
+      },
+      "android": {
+        "package": "com.gabrielcz.caravana"
+      }
+    }
+  }
