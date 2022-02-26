@@ -6,9 +6,9 @@ import {
   StyleSheet,
   Dimensions,
   Alert,
-  Keyboard
+  TextInput
 } from "react-native";
-import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
+// import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
 import { Formik } from "formik";
 
 import { RadioButton, Text } from "react-native-paper";
@@ -31,7 +31,7 @@ const Inicio = () => {
     })
 
   return (
-    <ScrollView contentContainerStyle={tailwind("flex-1 bg-white justify-start items-center")}>
+    <ScrollView contentContainerStyle={tailwind("flex bg-white justify-start items-center")}>
       <Formik
         initialValues={{ code: "", letter: "", number: "", sex: "", other: "false" }}
         onSubmit={({ code, letter, number, sex, other }, actions) => {
@@ -156,6 +156,9 @@ const Inicio = () => {
                   backgroundColor: "#900",
                   padding: 5,
                   borderRadius: 5,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
               >
                 <MaterialCommunityIcons
@@ -164,23 +167,54 @@ const Inicio = () => {
                   color="white"
                   onPress={() => inputNumberRef.current.focus()}
                 />
-                <SmoothPinCodeInput
-                  cellStyle={{
-                    borderBottomWidth: 2,
-                    borderColor: 'white',
-                  }}
-                  cellStyleFocused={{
-                    borderColor: 'white',
-                  }}
-                  textStyle={{
-                    color: 'white',
-                    fontSize: 24
-                  }}
-                  ref={inputNumberRef}
-                  value={formik.values.number}
-                  onTextChange={formik.handleChange('number')}
-                  onFulfill={() => { Keyboard.dismiss() }}
-                />
+                <Text style={tailwind("text-xl text-white")}>{formik.values.number}</Text>
+
+              </View>
+              <View style={tailwind("flex m-4 justify-between")}>
+                <View style={tailwind("flex-row")}>
+                  <TouchableOpacity onPress={(e) => formik.setFieldValue("number", formik.values.number + "1")} style={styles.num}>
+                    <Text style={tailwind("text-white")}>1</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={(e) => formik.setFieldValue("number", formik.values.number + "2")} style={styles.num}>
+                    <Text style={tailwind("text-white")}>2</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={(e) => formik.setFieldValue("number", formik.values.number + "3")} style={styles.num}>
+                    <Text style={tailwind("text-white")}>3</Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={tailwind("flex-row")}>
+                  <TouchableOpacity onPress={(e) => formik.setFieldValue("number", formik.values.number + "4")} style={styles.num}>
+                    <Text style={tailwind("text-white")}>4</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={(e) => formik.setFieldValue("number", formik.values.number + "5")} style={styles.num}>
+                    <Text style={tailwind("text-white")}>5</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={(e) => formik.setFieldValue("number", formik.values.number + "6")} style={styles.num}>
+                    <Text style={tailwind("text-white")}>6</Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={tailwind("flex-row")}>
+                  <TouchableOpacity onPress={(e) => formik.setFieldValue("number", formik.values.number + "7")} style={styles.num}>
+                    <Text style={tailwind("text-white")}>7</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={(e) => formik.setFieldValue("number", formik.values.number + "8")} style={styles.num}>
+                    <Text style={tailwind("text-white")}>8</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={(e) => formik.setFieldValue("number", formik.values.number + "9")} style={styles.num}>
+                    <Text style={tailwind("text-white")}>9</Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={tailwind("flex-row")}>
+                  <TouchableOpacity onPress={(e) => formik.setFieldValue("number", formik.values.number.slice(0, -1))} style={styles.num}>
+                    <Text style={tailwind("text-white")}>&lt;</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={(e) => formik.setFieldValue("number", formik.values.number + "0")} style={styles.num}>
+                    <Text style={tailwind("text-white")}>0</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.num}>
+                    <Text style={tailwind("text-white")}></Text>
+                  </TouchableOpacity>
+                </View>
               </View>
               <Text style={tailwind("text-xl")}>ES OTRO?</Text>
               <View style={tailwind("items-center")}>
@@ -217,7 +251,7 @@ const Inicio = () => {
           )
         }}
       </Formik>
-    </ScrollView >
+    </ScrollView>
   );
 }
 
@@ -248,6 +282,17 @@ const styles = StyleSheet.create({
     bottom: 5,
     backgroundColor: "#343434",
   },
+  num: {
+    width: 100, 
+    height: 50, 
+    margin: 2,
+    backgroundColor: "blue", 
+    fontSize: 40,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 5,
+  }
 });
 
 export default Inicio
