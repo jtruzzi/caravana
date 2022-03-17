@@ -91,25 +91,9 @@ export default function App() {
     })
   };
 
-  // const convertArrayToCSV = () => {
-  //   const csvString = [
-  //     [
-  //       "CUIGLetraNumero",
-  //       "Sexo",
-  //     ],
-  //     ...animals.map(animal => [
-  //       `${animal.code}${animal.letter}${animal.number}`,
-  //       animal.sex,
-  //     ])
-  //   ].map(e => e.join(","))
-  //     .join("\n");;
-
-  //   return csvString
-  // }
-
   return (
     <View style={styles.container}>
-      {/* <Modal
+      <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
@@ -127,7 +111,7 @@ export default function App() {
               style={tailwind("bg-white w-full p-6 rounded-lg items-center")}
             >
               <Text style={tailwind("text-gray-800 text-xl font-medium mt-4")}>
-                Lista de animales
+                Animal
               </Text>
 
               <View
@@ -137,7 +121,7 @@ export default function App() {
                   borderBottomWidth: 1,
                   height: 300,
                 }}>
-                <Text selectable={true}>{convertArrayToCSV(animals)}</Text>
+                <Text selectable={true}>ASD</Text>
               </View>
               <TouchableOpacity
                 onPress={() => {
@@ -154,7 +138,7 @@ export default function App() {
             </View>
           </View>
         </View>
-      </Modal> */}
+      </Modal>
       <View
         style={{
           width: "100%",
@@ -174,7 +158,7 @@ export default function App() {
             {animals.length}
             <MaterialCommunityIcons name={"cow"} size={45} color="#900" />
           </Text>
-          {animals.reverse().map((animal, index) => (
+          {animals.reverse()?.map((animal, index) => (
             <View
               key={index}
               style={tailwind(
@@ -190,6 +174,11 @@ export default function App() {
                   <Text style={{ fontSize: 35 }}>{animal.letter}{animal.number.substring(0, 3)}
                     <Text style={{ fontSize: 25, color: "#900" }}>{animal.number.substring(3, 4)}</Text>
                   </Text>
+                </View>
+                <View>
+                  <TouchableOpacity onPress={() => setModalVisible(true)}>
+                    <Text style={{ color: "black", fontSize: 20, margin: 10 }}>EDITAR</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
             </View>

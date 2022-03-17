@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { useState, useEffect, useCallback } from "react"
 import {
   ScrollView,
   View,
@@ -6,32 +6,65 @@ import {
   StyleSheet,
   Dimensions,
   Alert,
-  TextInput
+  TextInput,
+  RefreshControl
 } from "react-native";
 // import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
 import { Formik } from "formik";
 
-import { RadioButton, Text } from "react-native-paper";
+import { RadioButton, Text, Chip } from "react-native-paper";
 import { MaterialCommunityIcons } from "react-native-vector-icons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import tailwind from "tailwind-rn";
 import CustomRadioButton from "../components/CustomRadioButton";
+import { getData, setData } from "../components/utils";
 
 const Inicio = () => {
-  const inputNumberRef = useRef();
+  const [config, setConfig] = useState({ cuigs: [] });
 
   AsyncStorage.getItem('animals')
     .then((datavacas) => {
       if (datavacas === null) {
-        AsyncStorage.setItem('animals', JSON.stringify([]));
+        AsyncStorage.setItem('animals', []);
       }
     })
     .catch((err) => {
       alert(err)
     })
 
+  useEffect(async () => {
+    const storedConfig = await getData("config");
+    setConfig(storedConfig);
+  }, []);
+
+  useEffect(async () => {
+    try {
+      const config = await getData("config");
+
+      if (config !== null) {
+        setConfig(config);
+      }
+    } catch (e) {
+      alert(e.message);
+      alert("Error al leer AsyncStorage");
+    }
+  }, []);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    const storedConfig = await getData("config");
+    setConfig(storedConfig);
+    return new Promise(resolve => setTimeout(resolve, 2000)).then(() => setRefreshing(false));
+  }, []);
+
   return (
     <ScrollView contentContainerStyle={tailwind("flex bg-white justify-start items-center")}>
+      <RefreshControl
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+      />
       <Formik
         initialValues={{ code: "", letter: "", number: "", sex: "", other: "false" }}
         onSubmit={({ code, letter, number, sex, other }, actions) => {
@@ -64,12 +97,12 @@ const Inicio = () => {
                 // Si hay data anterior
                 const vacas = JSON.parse(datavacas)
                 vacas.push(itemvaca)
-                AsyncStorage.setItem('animals', JSON.stringify(vacas));
+                setData('animals', vacas)
               }
               else {
                 const vacas = []
                 vacas.push(itemvaca)
-                AsyncStorage.setItem('animals', JSON.stringify(vacas));
+                setData('animals', vacas)
               }
             })
               .catch((err) => {
@@ -85,90 +118,98 @@ const Inicio = () => {
           return (
             <>
               <Text style={tailwind("text-xl")}>CUIG</Text>
-              <RadioButton.Group
-                onValueChange={formik.handleChange("code")}
-                value={formik.values.code}
+              <View
+                style={{
+                  flexDirection: "row",
+                  borderColor: "black",
+                  alignContent: 'center',
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  flexWrap: 'wrap',
+                }}
               >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    borderColor: "black",
-                    padding: 5,
-                  }}
-                >
-                  <CustomRadioButton title="EV833" value="EV833" />
-                  <CustomRadioButton title="EV860" value="EV860" />
-                </View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    borderColor: "black",
-                    padding: 5,
-                  }}
-                >
-                  <CustomRadioButton title="EV841" value="EV841" />
-                  <CustomRadioButton title="EV907" value="EV907" />
-                </View>
-              </RadioButton.Group>
+                {config.cuigs?.map((cuig, index) => (
+                  <Chip
+                    selected={cuig == formik.values.code}
+                    onPress={() => {
+                      formik.setFieldValue('code', cuig)
+                      formik.setFieldValue("other", false)
+                    }}
+                    style={tailwind('m-1')}
+                    textStyle={tailwind('mx-2 my-2 text-xl')}
+                  >{cuig}</Chip>
+                ))}
+              </View>
 
               <View style={tailwind("flex-row")}>
                 <View style={tailwind("items-center")}>
                   <Text style={tailwind("text-xl")}>LETRA</Text>
-                  <RadioButton.Group
-                    onValueChange={formik.handleChange("letter")}
-                    value={formik.values.letter}
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      borderRadius: 5,
+                      padding: 5,
+                    }}
                   >
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        borderRadius: 5,
-                        padding: 5,
-                      }}
-                    >
-                      <CustomRadioButton title="A" value="A" />
-                      <CustomRadioButton title="B" value="B" />
-                    </View>
-                  </RadioButton.Group>
+                    <Chip
+                      selected={'A' == formik.values.letter}
+                      onPress={() => formik.setFieldValue('letter', 'A')}
+                      style={tailwind('m-1')}
+                      textStyle={tailwind('mx-2 my-2 text-xl')}
+                    >A</Chip>
+                    <Chip
+                      selected={'B' == formik.values.letter}
+                      onPress={() => formik.setFieldValue('letter', 'B')}
+                      style={tailwind('m-1')}
+                      textStyle={tailwind('mx-2 my-2 text-xl')}
+                    >B</Chip>
+                  </View>
                 </View>
                 <View style={tailwind("items-center")}>
                   <Text style={tailwind("text-xl")}>SEXO</Text>
-                  <RadioButton.Group
-                    onValueChange={formik.handleChange("sex")}
-                    value={formik.values.sex}
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      borderRadius: 5,
+                      padding: 5,
+                    }}
                   >
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        borderRadius: 5,
-                        padding: 5,
-                      }}
-                    >
-                      <CustomRadioButton title="M" value="M" />
-                      <CustomRadioButton title="H" value="H" />
-                    </View>
-                  </RadioButton.Group>
+                    <Chip
+                      selected={'M' == formik.values.sex}
+                      onPress={() => formik.setFieldValue('sex', 'M')}
+                      style={tailwind('m-1')}
+                      textStyle={tailwind('mx-2 my-2 text-xl')}
+                    >M</Chip>
+                    <Chip
+                      selected={'H' == formik.values.sex}
+                      onPress={() => formik.setFieldValue('sex', 'H')}
+                      style={tailwind('m-1')}
+                      textStyle={tailwind('mx-2 my-2 text-xl')}
+                    >H</Chip>
+                  </View>
                 </View>
               </View>
-              <Text style={tailwind("text-xl")}>NÚMERO</Text>
-              <View
-                style={{
-                  flexDirection: "row",
-                  backgroundColor: "#900",
-                  padding: 5,
-                  borderRadius: 5,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <MaterialCommunityIcons
-                  name={formik.values.number ? "cow" : "feature-search-outline"}
-                  size={45}
-                  color="white"
-                  onPress={() => inputNumberRef.current.focus()}
-                />
-                <Text style={tailwind("text-xl text-white")}>{formik.values.number}</Text>
+              <View style={tailwind('flex-row items-center ')}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    backgroundColor: "#900",
+                    padding: 5,
+                    borderRadius: 5,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text style={tailwind("text-xl text-white")}>NÚMERO:</Text>
+                  <MaterialCommunityIcons
+                    name={formik.values.number ? "cow" : "feature-search-outline"}
+                    size={45}
+                    color="white"
+                  />
+                  <Text style={tailwind("text-xl text-white")}>{formik.values.number}</Text>
 
+                </View>
               </View>
               <View style={tailwind("flex m-4 justify-between")}>
                 <View style={tailwind("flex-row")}>
@@ -216,28 +257,29 @@ const Inicio = () => {
                   </TouchableOpacity>
                 </View>
               </View>
-              <Text style={tailwind("text-xl")}>ES OTRO?</Text>
+
               <View style={tailwind("items-center")}>
-                <RadioButton.Group
-                  onValueChange={(value) => {
-                    formik.setFieldValue("other", value)
-                    if (value === "true") {
-                      formik.setFieldValue("code", "")
-                    }
+                <View
+                  style={{
+                    flexDirection: "row",
+                    borderRadius: 5,
+                    padding: 5,
+                    alignItems: "center"
                   }}
-                  value={formik.values.other}
                 >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      borderRadius: 5,
-                      padding: 5,
+                  <Chip
+                    selected={formik.values.other === 'true'}
+                    onPress={() => {
+                      const value = formik.values.other == "true" ? "false" : "true";
+                      formik.setFieldValue("other", value)
+                      if (value === "true") {
+                        formik.setFieldValue("code", "")
+                      }
                     }}
-                  >
-                    <CustomRadioButton title="SI" value="true" />
-                    <CustomRadioButton title="NO" value="false" />
-                  </View>
-                </RadioButton.Group>
+                    style={tailwind('m-1')}
+                    textStyle={tailwind('mx-2 my-2 text-xl')}
+                  >Es Otro?</Chip>
+                </View>
               </View>
 
 
@@ -283,10 +325,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#343434",
   },
   num: {
-    width: 100, 
-    height: 50, 
+    width: 100,
+    height: 50,
     margin: 2,
-    backgroundColor: "blue", 
+    backgroundColor: "gray",
     fontSize: 40,
     display: "flex",
     justifyContent: "center",
