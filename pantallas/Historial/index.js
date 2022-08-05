@@ -5,14 +5,14 @@ import {
   Dimensions,
   TouchableOpacity,
   ScrollView,
-  Modal,
   Alert,
 } from "react-native";
-
+import { DataTable } from 'react-native-paper';
 import { Text } from "react-native-paper";
 import { MaterialCommunityIcons } from "react-native-vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import tailwind from "tailwind-rn";
+import EditForm from "./EditForm";
 // TENGO QUE CAMBIAR ESTE CODIGO!
 // Required to save to cache 
 import * as FileSystem from 'expo-file-system';
@@ -27,10 +27,12 @@ const width = Dimensions.get("window").width;
 export default function App() {
   const [modalVisible, setModalVisible] = useState(false);
   const [animals, setAnimals] = useState([]);
+  const [selectedAnimal, setSelectedAnimal] = useState();
 
   const readStorage = async () => {
     try {
       const dataasync = await AsyncStorage.getItem("animals");
+      console.info({ dataasync });
 
       if (dataasync !== null) {
         setAnimals([...JSON.parse(dataasync)]);
@@ -93,52 +95,7 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}
-      >
-        <View>
-          <View
-            style={tailwind(
-              "h-full items-center justify-center bg-gray-500 p-12 pt-40"
-            )}
-          >
-            <View
-              style={tailwind("bg-white w-full p-6 rounded-lg items-center")}
-            >
-              <Text style={tailwind("text-gray-800 text-xl font-medium mt-4")}>
-                Animal
-              </Text>
-
-              <View
-                style={{
-                  backgroundColor: '#FFFFFF',
-                  borderBottomColor: '#000000',
-                  borderBottomWidth: 1,
-                  height: 300,
-                }}>
-                <Text selectable={true}>ASD</Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => {
-                  setModalVisible(!modalVisible);
-                }}
-                style={tailwind(
-                  "bg-indigo-600 w-full py-2 items-center rounded-md mt-6"
-                )}
-              >
-                <Text style={tailwind("text-white font-medium")}>
-                  Cerrar
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      <EditForm open={modalVisible} onClose={() => setModalVisible(false)} selectedAnimal={selectedAnimal} />
       <View
         style={{
           width: "100%",
@@ -158,38 +115,33 @@ export default function App() {
             {animals.length}
             <MaterialCommunityIcons name={"cow"} size={45} color="#900" />
           </Text>
-          {animals.reverse()?.map((animal, index) => (
-            <View
-              key={index}
-              style={tailwind(
-                `justify-center items-center rounded bg-green-400 my-2 w-full`
-              )}
-            >
-              <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                <View>
-                  <Text style={{ color: "black", fontSize: 40, margin: 10 }}>{animals.length - index}</Text>
-                </View>
-                <View style={{ margin: 10, borderColor: 'black', display: "flex", alignItems: "center" }}>
-                  <Text style={{ fontSize: 35 }}>{animal.code || "---"} ({animal.sex})</Text>
-                  <Text style={{ fontSize: 35 }}>{animal.letter}{animal.number.substring(0, 3)}
-                    <Text style={{ fontSize: 25, color: "#900" }}>{animal.number.substring(3, 4)}</Text>
-                  </Text>
-                </View>
-                <View>
-                  <TouchableOpacity onPress={() => setModalVisible(true)}>
-                    <Text style={{ color: "black", fontSize: 20, margin: 10 }}>EDITAR</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
-          ))}
+          <DataTable>
+            <DataTable.Header>
+              <DataTable.Title>Orden</DataTable.Title>
+              <DataTable.Title>Animal</DataTable.Title>
+            </DataTable.Header>
+            {animals?.map((animal, index) => (
+              <TouchableOpacity key={`${animal.code}-${index}`} onPress={() => {
+                setSelectedAnimal(animal);
+                setModalVisible(true);
+              }}>
+                <DataTable.Row>
+                  <DataTable.Cell>
+                    <Text>{index + 1}</Text>
+                  </DataTable.Cell>
+                  <DataTable.Cell>{animal.code || "---"} ({animal.sex}) {animal.letter}{animal.number.substring(0, 3)} {animal.number.substring(3, 4)}</DataTable.Cell>
+                </DataTable.Row>
+              </TouchableOpacity>
+            ))}
+          </DataTable>
+
           {animals.length != 0 ? <View style={{ width: width, alignItems: 'center' }}>
             <TouchableOpacity
               onPress={
                 shareExcel
               }
               style={tailwind(
-                "justify-center items-center p-4 w-4/5 rounded bg-green-600 my-2"
+                "justify-center items-center p-2 w-4/5 rounded bg-green-600 my-2"
               )}
             >
               <Text style={tailwind("text-lg text-white")}>

@@ -25,7 +25,7 @@ const Inicio = () => {
   AsyncStorage.getItem('animals')
     .then((datavacas) => {
       if (datavacas === null) {
-        AsyncStorage.setItem('animals', []);
+        AsyncStorage.setItem('animals', "[]");
       }
     })
     .catch((err) => {
@@ -48,7 +48,7 @@ const Inicio = () => {
       alert(e.message);
       alert("Error al leer AsyncStorage");
     }
-  }, []);
+  });
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -129,7 +129,7 @@ const Inicio = () => {
                 }}
               >
                 {config.cuigs?.map((cuig, index) => (
-                  <Chip
+                  <Chip key={`cuigs-${index}`}
                     selected={cuig == formik.values.code}
                     onPress={() => {
                       formik.setFieldValue('code', cuig)
