@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Inicio from './pantallas/Inicio';
@@ -12,32 +11,34 @@ const Tab = createBottomTabNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Tab.Navigator>
+      <Tab.Navigator
+        initialRouteName="Contador de ganado"
+        screenOptions={{
+          tabBarActiveTintColor: '#e91e63',
+        }}
+      >
         <Tab.Screen name="Contador de ganado" component={Inicio} options={{
-
           tabBarIcon: ({ size, color }) => (
-            <MaterialCommunityIcons name={"cow"} color={'#900'} size={size} />
+            <MaterialCommunityIcons name={"cow"} color={color} size={size} />
           ),
           headerTitleAlign: "center",
-          tabBarLabel:() => {return null},
+          tabBarLabel: () => { return null },
         }}
         />
         <Tab.Screen name="Historial" component={Historial} options={{
-
           tabBarIcon: ({ size, color }) => (
-            <MaterialCommunityIcons name={"feature-search-outline"} color={'#900'} size={size} />
+            <MaterialCommunityIcons name={"feature-search-outline"} color={color} size={size} />
           ),
           headerTitleAlign: "center",
-          tabBarLabel:() => {return null},
+          tabBarLabel: () => { return null },
         }}
         />
         <Tab.Screen name="Configuración" component={Config} options={{
-
           tabBarIcon: ({ size, color }) => (
-            <Ionicons name={"settings"} color={'#900'} size={size} />
+            <Ionicons name={"settings"} color={color} size={size} />
           ),
           headerTitleAlign: "center",
-          tabBarLabel:() => {return null},
+          tabBarLabel: () => { return null },
         }}
         />
       </Tab.Navigator>

@@ -16,28 +16,19 @@ import { Snackbar } from 'react-native-paper';
 
 import { MaterialCommunityIcons } from "react-native-vector-icons";
 import tailwind from "tailwind-rn";
-import { getData, setData } from "../components/utils";
+import { setData } from "../components/utils";
+import { useGetConfig } from "../hooks/config";
 
 const Config = () => {
-  const [config, setConfig] = useState();
-  useEffect(async () => {
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { config } = useGetConfig(isRefreshing);
 
-    try {
-      const storedConfig = await getData("config");
-      setConfig(storedConfig);
-    } catch (e) {
-      alert(e.message);
-      alert("Error al leer la configuración");
-    }
-  }, [])
-
-  const [refreshing, setRefreshing] = useState(false);
-
-  const onRefresh = useCallback(async () => {
-    const storedConfig = await getData("config");
-    setConfig(storedConfig);
-    return new Promise(resolve => setTimeout(resolve, 2000)).then(() => setRefreshing(false));
-  }, []);
+  const onRefresh = () => {
+    setIsRefreshing(true);
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 1000);
+  };
 
 
   const [visible, setVisible] = useState(false);
@@ -48,7 +39,7 @@ const Config = () => {
     <>
       <ScrollView contentContainerStyle={tailwind("flex bg-white justify-start items-center")}>
         <RefreshControl
-          refreshing={refreshing}
+          refreshing={isRefreshing}
           onRefresh={onRefresh}
         />
 
@@ -62,48 +53,86 @@ const Config = () => {
         >
           {(formik) => {
             return (
-              <View style={tailwind("w-full px-4")}>
-                <Text>Códigos CUIG</Text>
-                <FieldArray
-                  name={"cuigs"}
-                  validateOnChange={true}
-                  render={arrayHelpers => (
-                    <>
-                      {formik.values?.cuigs?.map((cuig, index) => (
-                        <View key={`cuig-form-${index}`} style={tailwind("w-full flex flex-row")}>
-                          <TextInput
-                            name={`cuigs[${index}]`}
-                            onChangeText={formik.handleChange(`cuigs[${index}]`)}
-                            placeholder="Ingresar CUIG"
-                            value={cuig}
-                            style={tailwind("text-xl border rounded px-2 my-2 flex-grow mr-2")}
-                          />
+              <>
+                <View style={tailwind("w-full px-4")}>
+                  <Text>Códigos CUIG</Text>
+                  <FieldArray
+                    name={"cuigs"}
+                    validateOnChange={true}
+                    render={arrayHelpers => (
+                      <>
+                        {formik.values?.cuigs?.map((cuig, index) => (
+                          <View key={`cuig-form-${index}`} style={tailwind("w-full flex flex-row")}>
+                            <TextInput
+                              name={`cuigs[${index}]`}
+                              onChangeText={formik.handleChange(`cuigs[${index}]`)}
+                              placeholder="Ingresar CUIG"
+                              value={cuig}
+                              style={tailwind("text-xl border rounded px-2 my-2 flex-grow mr-2")}
+                            />
+                            <TouchableOpacity
+                              onPress={() => arrayHelpers.remove(index)}
+                              style={tailwind("justify-center items-center px-4 h-10 rounded bg-red-600 my-2")}
+                            >
+                              <MaterialCommunityIcons name={"minus"} color={'#fff'} size={25} />
+                            </TouchableOpacity>
+                          </View>
+                        ))}
+                        <View style={tailwind("w-full flex flex-row")}>
                           <TouchableOpacity
-                            onPress={() => arrayHelpers.remove(index)}
-                            style={tailwind("justify-center items-center px-4 h-10 rounded bg-red-600 my-2")}
+                            onPress={() => arrayHelpers.push('')}
+                            style={tailwind("justify-center items-center px-4 h-10 rounded bg-green-600 my-2")}
                           >
-                            <MaterialCommunityIcons name={"minus"} color={'#fff'} size={25} />
+                            <MaterialCommunityIcons name={"plus"} color={'#fff'} size={25} />
                           </TouchableOpacity>
                         </View>
-                      ))}
-                      <View style={tailwind("w-full flex flex-row")}>
-                        <TouchableOpacity
-                          onPress={() => arrayHelpers.push('')}
-                          style={tailwind("justify-center items-center px-4 h-10 rounded bg-green-600 my-2")}
-                        >
-                          <MaterialCommunityIcons name={"plus"} color={'#fff'} size={25} />
-                        </TouchableOpacity>
-                      </View>
-                    </>
-                  )}
-                />
+                      </>
+                    )}
+                  />
+                </View>
+                <View style={tailwind("w-full px-4")}>
+                  <Text>Letras</Text>
+                  <FieldArray
+                    name={"letters"}
+                    validateOnChange={true}
+                    render={arrayHelpers => (
+                      <>
+                        {formik.values?.letters?.map((letter, index) => (
+                          <View key={`letter-form-${index}`} style={tailwind("w-full flex flex-row")}>
+                            <TextInput
+                              name={`letters[${index}]`}
+                              onChangeText={formik.handleChange(`letters[${index}]`)}
+                              placeholder="Ingresar Letra"
+                              value={letter}
+                              style={tailwind("text-xl border rounded px-2 my-2 flex-grow mr-2")}
+                            />
+                            <TouchableOpacity
+                              onPress={() => arrayHelpers.remove(index)}
+                              style={tailwind("justify-center items-center px-4 h-10 rounded bg-red-600 my-2")}
+                            >
+                              <MaterialCommunityIcons name={"minus"} color={'#fff'} size={25} />
+                            </TouchableOpacity>
+                          </View>
+                        ))}
+                        <View style={tailwind("w-full flex flex-row")}>
+                          <TouchableOpacity
+                            onPress={() => arrayHelpers.push('')}
+                            style={tailwind("justify-center items-center px-4 h-10 rounded bg-green-600 my-2")}
+                          >
+                            <MaterialCommunityIcons name={"plus"} color={'#fff'} size={25} />
+                          </TouchableOpacity>
+                        </View>
+                      </>
+                    )}
+                  />
+                </View>
                 <TouchableOpacity
                   onPress={formik.handleSubmit}
                   style={tailwind(`flex flex-row justify-center items-center px-4 h-10 rounded bg-green-600 my-2 ${formik.isSubmitting || !formik.dirty ? 'bg-black' : ''}`)}
                 >
                   <Text style={tailwind('text-white')}>GUARDAR</Text>
                 </TouchableOpacity>
-              </View>
+              </>
             )
           }}
         </Formik>

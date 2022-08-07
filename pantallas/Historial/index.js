@@ -102,19 +102,44 @@ export default function App() {
           alignItems: "center",
           backgroundColor: "white",
           justifyContent: "center",
+          marginTop: 50,
+          marginBottom: 50,
         }}
       >
+        {animals.length != 0 ? <View style={{ width: width, alignItems: 'center' }}>
+          <TouchableOpacity
+            onPress={
+              shareExcel
+            }
+            style={tailwind(
+              "justify-center items-center p-2 w-4/5 rounded bg-green-600 my-1"
+            )}
+          >
+            <Text style={tailwind("text-lg text-white")}>
+              EXPORTAR DATOS{" "}<MaterialCommunityIcons name={"download"} size={21} />
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              AsyncStorage.setItem("animals", JSON.stringify([]));
+            }}
+            style={tailwind(
+              "justify-center items-center p-2 w-4/5 rounded bg-red-600 my-1"
+            )}
+          >
+            <Text style={tailwind("text-lg text-white")}>Comenzar nuevo conteo</Text>
+          </TouchableOpacity></View> : null}
+        <Text style={{ fontSize: 40, fontWeight: "bold" }}>
+          {animals.length}
+          <MaterialCommunityIcons name={"cow"} size={45} color="#900" />
+        </Text>
+
         <ScrollView
           contentContainerStyle={{
             width: Dimensions.get("window").width,
-            flexGrow: 1,
             alignItems: "center",
           }}
         >
-          <Text style={{ fontSize: 40, fontWeight: "bold" }}>
-            {animals.length}
-            <MaterialCommunityIcons name={"cow"} size={45} color="#900" />
-          </Text>
           <DataTable>
             <DataTable.Header>
               <DataTable.Title>Orden</DataTable.Title>
@@ -134,31 +159,8 @@ export default function App() {
               </TouchableOpacity>
             ))}
           </DataTable>
-
-          {animals.length != 0 ? <View style={{ width: width, alignItems: 'center' }}>
-            <TouchableOpacity
-              onPress={
-                shareExcel
-              }
-              style={tailwind(
-                "justify-center items-center p-2 w-4/5 rounded bg-green-600 my-2"
-              )}
-            >
-              <Text style={tailwind("text-lg text-white")}>
-                EXPORTAR DATOS{" "}<MaterialCommunityIcons name={"download"} size={21} />
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                AsyncStorage.setItem("animals", JSON.stringify([]));
-              }}
-              style={tailwind(
-                "justify-center items-center p-4 w-4/5 rounded bg-red-600 my-2"
-              )}
-            >
-              <Text style={tailwind("text-lg text-white")}>Comenzar nuevo conteo</Text>
-            </TouchableOpacity></View> : null}
         </ScrollView>
+
       </View>
     </View>
   );

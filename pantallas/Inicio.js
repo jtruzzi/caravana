@@ -12,62 +12,35 @@ import {
 // import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
 import { Formik } from "formik";
 
-import { RadioButton, Text, Chip } from "react-native-paper";
+import { Text, Chip } from "react-native-paper";
 import { MaterialCommunityIcons } from "react-native-vector-icons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import tailwind from "tailwind-rn";
-import CustomRadioButton from "../components/CustomRadioButton";
 import { getData, setData } from "../components/utils";
+import { useGetConfig } from "../hooks/config";
 
 const Inicio = () => {
-  const [config, setConfig] = useState({ cuigs: [] });
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { config } = useGetConfig(isRefreshing);
 
-  AsyncStorage.getItem('animals')
-    .then((datavacas) => {
-      if (datavacas === null) {
-        AsyncStorage.setItem('animals', "[]");
-      }
-    })
-    .catch((err) => {
-      alert(err)
-    })
-
-  useEffect(async () => {
-    const storedConfig = await getData("config");
-    setConfig(storedConfig);
-  }, []);
-
-  useEffect(async () => {
-    try {
-      const config = await getData("config");
-
-      if (config !== null) {
-        setConfig(config);
-      }
-    } catch (e) {
-      alert(e.message);
-      alert("Error al leer AsyncStorage");
-    }
-  });
-
-  const [refreshing, setRefreshing] = useState(false);
+  console.info({ config })
 
   const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    const storedConfig = await getData("config");
-    setConfig(storedConfig);
-    return new Promise(resolve => setTimeout(resolve, 2000)).then(() => setRefreshing(false));
+    setIsRefreshing(true);
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 1000);
   }, []);
 
   return (
-    <ScrollView contentContainerStyle={tailwind("flex bg-white justify-start items-center")}>
+    <ScrollView contentContainerStyle={tailwind("flex bg-white justify-start items-center py-4")}>
       <RefreshControl
-        refreshing={refreshing}
+        refreshing={isRefreshing}
         onRefresh={onRefresh}
       />
       <Formik
         initialValues={{ code: "", letter: "", number: "", sex: "", other: "false" }}
-        onSubmit={({ code, letter, number, sex, other }, actions) => {
+        onSubmit={({ code, letter, number, sex, other }, formik) => {
           if ((other == "false" && !code) || !letter || !number || !sex) {
             Alert.alert("Faltan rellenar campos");
             return;
@@ -108,7 +81,7 @@ const Inicio = () => {
               .catch((err) => {
                 alert(err)
               })
-            actions.resetForm();
+            formik.setFieldValue('number', '');
           }).catch((err) => {
             alert(err)
           });
@@ -141,6 +114,7 @@ const Inicio = () => {
                 ))}
               </View>
 
+
               <View style={tailwind("flex-row")}>
                 <View style={tailwind("items-center")}>
                   <Text style={tailwind("text-xl")}>LETRA</Text>
@@ -151,18 +125,15 @@ const Inicio = () => {
                       padding: 5,
                     }}
                   >
-                    <Chip
-                      selected={'A' == formik.values.letter}
-                      onPress={() => formik.setFieldValue('letter', 'A')}
-                      style={tailwind('m-1')}
-                      textStyle={tailwind('mx-2 my-2 text-xl')}
-                    >A</Chip>
-                    <Chip
-                      selected={'B' == formik.values.letter}
-                      onPress={() => formik.setFieldValue('letter', 'B')}
-                      style={tailwind('m-1')}
-                      textStyle={tailwind('mx-2 my-2 text-xl')}
-                    >B</Chip>
+                    {config?.letters?.map((letter, index) => (
+                      <Chip
+                        key={`letters-${index}`}
+                        selected={letter == formik.values.letter}
+                        onPress={() => formik.setFieldValue('letter', letter)}
+                        style={tailwind('m-1')}
+                        textStyle={tailwind('mx-2 my-2 text-xl')}
+                      >{letter}</Chip>
+                    ))}
                   </View>
                 </View>
                 <View style={tailwind("items-center")}>
@@ -194,7 +165,7 @@ const Inicio = () => {
                   style={{
                     flexDirection: "row",
                     backgroundColor: "#900",
-                    padding: 5,
+                    padding: 8,
                     borderRadius: 5,
                     display: "flex",
                     justifyContent: "center",
@@ -202,13 +173,28 @@ const Inicio = () => {
                   }}
                 >
                   <Text style={tailwind("text-xl text-white")}>NÚMERO:</Text>
-                  <MaterialCommunityIcons
-                    name={formik.values.number ? "cow" : "feature-search-outline"}
-                    size={45}
-                    color="white"
-                  />
                   <Text style={tailwind("text-xl text-white")}>{formik.values.number}</Text>
-
+                </View>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    borderRadius: 5,
+                    padding: 5,
+                    alignItems: "center"
+                  }}
+                >
+                  <Chip
+                    selected={formik.values.other === 'true'}
+                    onPress={() => {
+                      const value = formik.values.other == "true" ? "false" : "true";
+                      formik.setFieldValue("other", value)
+                      if (value === "true") {
+                        formik.setFieldValue("code", "")
+                      }
+                    }}
+                    style={tailwind('m-1')}
+                    textStyle={tailwind('mx-2 my-2 text-xl')}
+                  >Es Otro?</Chip>
                 </View>
               </View>
               <View style={tailwind("flex m-4 justify-between")}>
@@ -257,31 +243,6 @@ const Inicio = () => {
                   </TouchableOpacity>
                 </View>
               </View>
-
-              <View style={tailwind("items-center")}>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    borderRadius: 5,
-                    padding: 5,
-                    alignItems: "center"
-                  }}
-                >
-                  <Chip
-                    selected={formik.values.other === 'true'}
-                    onPress={() => {
-                      const value = formik.values.other == "true" ? "false" : "true";
-                      formik.setFieldValue("other", value)
-                      if (value === "true") {
-                        formik.setFieldValue("code", "")
-                      }
-                    }}
-                    style={tailwind('m-1')}
-                    textStyle={tailwind('mx-2 my-2 text-xl')}
-                  >Es Otro?</Chip>
-                </View>
-              </View>
-
 
               <TouchableOpacity onPress={formik.handleSubmit} style={tailwind("justify-center items-center p-4 w-4/5 rounded bg-green-600 my-2")}>
                 <Text style={tailwind("text-lg text-white")}>Ingresar</Text>
