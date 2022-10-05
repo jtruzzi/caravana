@@ -1,13 +1,16 @@
 {
   "expo": {
-    "name": "Caravana",
-    "description": "Contador de ganado",
+    "name": "caravana",
+    "slug": "caravana",
+    "version": "1.0.0",
+    "sdkVersion": "46.0.0",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "package": "com.gabrielcz.caravana"
-    },
-    "slug": "caravana"
+      "bundleIdentifier": "com.anonymous.caravana"
+    }
   }
 }
