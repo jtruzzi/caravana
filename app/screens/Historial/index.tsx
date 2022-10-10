@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   StyleSheet,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  RefreshControl,
 } from "react-native";
 import { DataTable } from "react-native-paper";
 import { Text } from "react-native-paper";
@@ -21,31 +22,24 @@ import ExcelJS from "exceljs";
 // Share excel via share dialog
 import * as Sharing from "expo-sharing";
 import { Buffer as NodeBuffer } from "buffer";
+import { useGetAnimals } from "../../hooks/config";
+import { setData } from "../../components/utils";
 
 const width = Dimensions.get("window").width;
 
 export default function Historial() {
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [animals, setAnimals] = useState([]);
+  const { animals } = useGetAnimals(isRefreshing);
   const [selectedAnimal, setSelectedAnimal] = useState();
   const tailwind = useTailwind();
 
-  const readStorage = async () => {
-    try {
-      const dataasync = await AsyncStorage.getItem("animals");
-      console.info({ dataasync });
-
-      if (dataasync !== null) {
-        setAnimals([...JSON.parse(dataasync)]);
-      }
-    } catch (e) {
-      alert("Error al leer AsyncStorage");
-    }
-  };
-
-  useEffect(() => {
-    readStorage();
-  });
+  const onRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 1000);
+  }, []);
 
   const generateShareableExcel = async () => {
     const now = new Date();
@@ -99,89 +93,96 @@ export default function Historial() {
   };
 
   return (
-    <View style={styles.container}>
-      <EditForm
-        open={modalVisible}
-        onClose={() => setModalVisible(false)}
-        selectedAnimal={selectedAnimal}
-      />
-      <View
-        style={{
-          width: "100%",
-          alignItems: "center",
-          backgroundColor: "white",
-          justifyContent: "center",
-          marginTop: 50,
-          marginBottom: 50,
-        }}
-      >
-        {animals.length != 0 ? (
-          <View style={{ width: width, alignItems: "center" }}>
-            <TouchableOpacity
-              onPress={shareExcel}
-              style={tailwind(
-                "justify-center items-center p-2 w-4/5 rounded bg-green-600 my-1"
-              )}
-            >
-              <Text style={tailwind("text-lg text-white")}>
-                EXPORTAR DATOS{" "}
-                <MaterialCommunityIcons name={"download"} size={21} />
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                AsyncStorage.setItem("animals", JSON.stringify([]));
-              }}
-              style={tailwind(
-                "justify-center items-center p-2 w-4/5 rounded bg-red-600 my-1"
-              )}
-            >
-              <Text style={tailwind("text-lg text-white")}>
-                Comenzar nuevo conteo
-              </Text>
-            </TouchableOpacity>
-          </View>
-        ) : null}
-        <Text style={{ fontSize: 40, fontWeight: "bold" }}>
-          {animals.length}
-          <MaterialCommunityIcons name={"cow"} size={45} color="#900" />
-        </Text>
-
-        <ScrollView
-          contentContainerStyle={{
-            width: Dimensions.get("window").width,
+    <ScrollView
+      contentContainerStyle={tailwind(
+        "flex bg-white justify-start items-center py-4"
+      )}
+    >
+      <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+      <View style={styles.container}>
+        <EditForm
+          open={modalVisible}
+          onClose={() => setModalVisible(false)}
+          selectedAnimal={selectedAnimal}
+        />
+        <View
+          style={{
+            width: "100%",
             alignItems: "center",
+            backgroundColor: "white",
+            justifyContent: "center",
+            marginTop: 50,
+            marginBottom: 50,
           }}
         >
-          <DataTable>
-            <DataTable.Header>
-              <DataTable.Title>Orden</DataTable.Title>
-              <DataTable.Title>Animal</DataTable.Title>
-            </DataTable.Header>
-            {animals?.map((animal, index) => (
+          {animals.length != 0 ? (
+            <View style={{ width: width, alignItems: "center" }}>
               <TouchableOpacity
-                key={`${animal.code}-${index}`}
-                onPress={() => {
-                  setSelectedAnimal(animal);
-                  setModalVisible(true);
-                }}
+                onPress={shareExcel}
+                style={tailwind(
+                  "justify-center items-center p-2 w-4/5 rounded bg-green-600 my-1"
+                )}
               >
-                <DataTable.Row>
-                  <DataTable.Cell>
-                    <Text>{index + 1}</Text>
-                  </DataTable.Cell>
-                  <DataTable.Cell>
-                    {animal.code || "---"} ({animal.sex}) {animal.letter}
-                    {animal.number.substring(0, 3)}{" "}
-                    {animal.number.substring(3, 4)}
-                  </DataTable.Cell>
-                </DataTable.Row>
+                <Text style={tailwind("text-lg text-white")}>
+                  EXPORTAR DATOS{" "}
+                  <MaterialCommunityIcons name={"download"} size={21} />
+                </Text>
               </TouchableOpacity>
-            ))}
-          </DataTable>
-        </ScrollView>
+              <TouchableOpacity
+                onPress={() => {
+                  setData("animals", []);
+                }}
+                style={tailwind(
+                  "justify-center items-center p-2 w-4/5 rounded bg-red-600 my-1"
+                )}
+              >
+                <Text style={tailwind("text-lg text-white")}>
+                  Comenzar nuevo conteo
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
+          <Text style={{ fontSize: 40, fontWeight: "bold" }}>
+            {animals.length}
+            <MaterialCommunityIcons name={"cow"} size={45} color="#900" />
+          </Text>
+
+          <ScrollView
+            contentContainerStyle={{
+              width: Dimensions.get("window").width,
+              alignItems: "center",
+            }}
+          >
+            <DataTable>
+              <DataTable.Header>
+                <DataTable.Title>Orden</DataTable.Title>
+                <DataTable.Title>Animal</DataTable.Title>
+              </DataTable.Header>
+              {animals?.map((animal, index) => (
+                <TouchableOpacity
+                  key={`${animal.code}-${index}`}
+                  onPress={() => {
+                    setSelectedAnimal(animal);
+                    setModalVisible(true);
+                  }}
+                >
+                  <DataTable.Row>
+                    <DataTable.Cell>
+                      <Text>{index + 1}</Text>
+                    </DataTable.Cell>
+                    <DataTable.Cell>
+                      {animal.code || "---"} ({animal.sex}) {animal.letter}
+                      {animal.number.substring(0, 3)}{" "}
+                      {animal.number.substring(3, 4)}
+                    </DataTable.Cell>
+                  </DataTable.Row>
+                </TouchableOpacity>
+              ))}
+            </DataTable>
+          </ScrollView>
+        </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   ScrollView,
   View,
@@ -17,11 +17,13 @@ import { Snackbar } from "react-native-paper";
 import { MaterialCommunityIcons } from "react-native-vector-icons";
 import { useTailwind } from "tailwind-rn";
 import { setData } from "../components/utils";
-import { useGetConfig } from "../hooks/config";
+import { useGetCuigs, useGetLetters } from "../hooks/config";
 
 const Config = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const { config } = useGetConfig(isRefreshing);
+  const { cuigs } = useGetCuigs(isRefreshing);
+  const { letters } = useGetLetters(isRefreshing);
+  useGetLetters;
   const tailwind = useTailwind();
 
   const onRefresh = () => {
@@ -46,9 +48,13 @@ const Config = () => {
 
         <Formik
           enableReinitialize={true}
-          initialValues={config}
+          initialValues={{
+            cuigs,
+            letters,
+          }}
           onSubmit={async (values, actions) => {
-            await setData("config", values);
+            await setData("cuigs", values.cuigs);
+            await setData("letters", values.letters);
             onToggleSnackBar();
           }}
         >
@@ -68,7 +74,7 @@ const Config = () => {
                             style={tailwind("w-full flex flex-row")}
                           >
                             <TextInput
-                              name={`cuigs[${index}]`}
+                              // name={`cuigs[${index}]`}
                               onChangeText={formik.handleChange(
                                 `cuigs[${index}]`
                               )}
@@ -123,7 +129,7 @@ const Config = () => {
                             style={tailwind("w-full flex flex-row")}
                           >
                             <TextInput
-                              name={`letters[${index}]`}
+                              // name={`letters[${index}]`}
                               onChangeText={formik.handleChange(
                                 `letters[${index}]`
                               )}

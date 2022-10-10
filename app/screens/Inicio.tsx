@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   ScrollView,
   View,
@@ -12,18 +12,18 @@ import {
 import { Formik } from "formik";
 
 import { Text, Chip } from "react-native-paper";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTailwind } from "tailwind-rn";
 
-import { setData } from "../components/utils";
-import { useGetConfig } from "../hooks/config";
+import { getData, setData } from "../components/utils";
+import { useGetCuigs, useGetLetters } from "../hooks/config";
 
 const Inicio = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const { config } = useGetConfig(isRefreshing);
+  const { cuigs } = useGetCuigs(isRefreshing);
+  const { letters } = useGetLetters(isRefreshing);
   const tailwind = useTailwind();
 
-  console.info({ config });
+  console.info({ cuigs, letters });
 
   const onRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -47,56 +47,43 @@ const Inicio = () => {
           sex: "",
           other: "false",
         }}
-        onSubmit={({ code, letter, number, sex, other }, formik) => {
+        onSubmit={async ({ code, letter, number, sex, other }, formik) => {
           if ((other == "false" && !code) || !letter || !number || !sex) {
             Alert.alert("Faltan rellenar campos");
             return;
           }
-          AsyncStorage.getItem("animals")
-            .then((datavacas) => {
-              const vacas = JSON.parse(datavacas);
-              const index = vacas.findIndex(
-                (vaquita) =>
-                  vaquita.code === code &&
-                  vaquita.letter === letter &&
-                  vaquita.number === number &&
-                  vaquita.sex === sex
-              );
-              if (index !== -1) {
-                Alert.alert(
-                  "ATENCION!",
-                  `ANIMAL DUPLICADO en posición ${index + 1}!`
-                );
-                return;
-              }
-              const itemvaca = {
-                code,
-                letter,
-                number,
-                sex,
-                other,
-              };
-              AsyncStorage.getItem("animals")
-                .then((datavacas) => {
-                  if (datavacas !== null) {
-                    // Si hay data anterior
-                    const vacas = JSON.parse(datavacas);
-                    vacas.push(itemvaca);
-                    setData("animals", vacas);
-                  } else {
-                    const vacas = [];
-                    vacas.push(itemvaca);
-                    setData("animals", vacas);
-                  }
-                })
-                .catch((err) => {
-                  alert(err);
-                });
-              formik.setFieldValue("number", "");
-            })
-            .catch((err) => {
-              alert(err);
-            });
+          const prevAnimals = await getData("animals");
+          const index = prevAnimals.findIndex(
+            (vaquita) =>
+              vaquita.code === code &&
+              vaquita.letter === letter &&
+              vaquita.number === number &&
+              vaquita.sex === sex
+          );
+          if (index !== -1) {
+            Alert.alert(
+              "ATENCION!",
+              `ANIMAL DUPLICADO en posición ${index + 1}!`
+            );
+            return;
+          }
+          const itemvaca = {
+            code,
+            letter,
+            number,
+            sex,
+            other,
+          };
+
+          if (prevAnimals !== null) {
+            prevAnimals.push(itemvaca);
+            setData("animals", prevAnimals);
+          } else {
+            const vacas = [];
+            vacas.push(itemvaca);
+            setData("animals", vacas);
+          }
+          formik.setFieldValue("number", "");
         }}
       >
         {(formik) => {
@@ -112,7 +99,7 @@ const Inicio = () => {
                   flexWrap: "wrap",
                 }}
               >
-                {config.cuigs?.map((cuig, index) => (
+                {cuigs?.map((cuig, index) => (
                   <Chip
                     key={`cuigs-${index}`}
                     selected={cuig == formik.values.code}
@@ -138,7 +125,7 @@ const Inicio = () => {
                       padding: 5,
                     }}
                   >
-                    {config?.letters?.map((letter, index) => (
+                    {letters?.map((letter, index) => (
                       <Chip
                         key={`letters-${index}`}
                         selected={letter == formik.values.letter}
