@@ -7,8 +7,8 @@ import {
   Dimensions,
   Alert,
   RefreshControl,
+  TextInput,
 } from "react-native";
-// import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
 import { Formik } from "formik";
 
 import { Text, Chip } from "react-native-paper";
@@ -29,26 +29,27 @@ const Inicio = () => {
     setIsRefreshing(true);
     setTimeout(() => {
       setIsRefreshing(false);
-    }, 1000);
+    }, 1);
   }, []);
 
   return (
     <ScrollView
       contentContainerStyle={tailwind(
-        "flex bg-white justify-start items-center py-4"
+        "flex bg-white justify-start items-center"
       )}
     >
       <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
       <Formik
+        enableReinitialize={true}
         initialValues={{
           code: "",
           letter: "",
           number: "",
           sex: "",
-          other: "false",
+          comment: "",
         }}
-        onSubmit={async ({ code, letter, number, sex, other }, formik) => {
-          if ((other == "false" && !code) || !letter || !number || !sex) {
+        onSubmit={async ({ code, letter, number, sex, comment }, formik) => {
+          if (!code || !letter || !number || !sex) {
             Alert.alert("Faltan rellenar campos");
             return;
           }
@@ -72,7 +73,7 @@ const Inicio = () => {
             letter,
             number,
             sex,
-            other,
+            comment,
           };
 
           if (prevAnimals !== null) {
@@ -84,6 +85,7 @@ const Inicio = () => {
             setData("animals", vacas);
           }
           formik.setFieldValue("number", "");
+          formik.setFieldValue("comment", "");
         }}
       >
         {(formik) => {
@@ -105,7 +107,7 @@ const Inicio = () => {
                     selected={cuig == formik.values.code}
                     onPress={() => {
                       formik.setFieldValue("code", cuig);
-                      formik.setFieldValue("other", false);
+                      formik.setFieldValue("comment", "");
                     }}
                     style={tailwind("m-1")}
                     textStyle={tailwind("mx-2 my-2 text-xl")}
@@ -166,11 +168,12 @@ const Inicio = () => {
                   </View>
                 </View>
               </View>
-              <View style={tailwind("flex-row items-center ")}>
+              <View style={tailwind("flex-row items-center")}>
                 <View
                   style={{
                     flexDirection: "row",
-                    backgroundColor: "#900",
+                    backgroundColor: "green",
+                    opacity: 0.7,
                     padding: 8,
                     borderRadius: 5,
                     display: "flex",
@@ -178,11 +181,27 @@ const Inicio = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Text style={tailwind("text-xl text-white")}>NÚMERO:</Text>
-                  <Text style={tailwind("text-xl text-white")}>
+                  <Text style={{ color: "white", fontSize: 20 }}>
                     {formik.values.number}
                   </Text>
                 </View>
+                <TextInput
+                  style={{
+                    borderWidth: 1,
+                    borderStyle: "solid",
+                    borderColor: "gray",
+                    width: 150,
+                    padding: 10,
+                    marginLeft: 20,
+                  }}
+                  // name="code"
+                  placeholder="Comentario"
+                  placeholderTextColor="gray"
+                  onChangeText={(newText) =>
+                    formik.setFieldValue("comment", newText)
+                  }
+                  value={formik.values.comment}
+                />
                 <View
                   style={{
                     flexDirection: "row",
@@ -190,23 +209,7 @@ const Inicio = () => {
                     padding: 5,
                     alignItems: "center",
                   }}
-                >
-                  <Chip
-                    selected={formik.values.other === "true"}
-                    onPress={() => {
-                      const value =
-                        formik.values.other == "true" ? "false" : "true";
-                      formik.setFieldValue("other", value);
-                      if (value === "true") {
-                        formik.setFieldValue("code", "");
-                      }
-                    }}
-                    style={tailwind("m-1")}
-                    textStyle={tailwind("mx-2 my-2 text-xl")}
-                  >
-                    Es Otro?
-                  </Chip>
-                </View>
+                ></View>
               </View>
               <View style={tailwind("flex m-4 justify-between")}>
                 <View style={tailwind("flex-row")}>

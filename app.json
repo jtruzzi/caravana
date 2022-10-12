@@ -11,6 +11,14 @@
     ],
     "ios": {
       "bundleIdentifier": "com.anonymous.caravana"
+    },
+    "android": {
+      "package": "caravana.jtruzzi.app"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7bd5cc6f-2e3d-40ce-b1e6-0a420691cd4f"
+      }
     }
   }
 }
