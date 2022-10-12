@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from "react";
-import Swipeout from "react-native-swipeout";
 import {
   View,
   StyleSheet,
@@ -95,13 +94,6 @@ export default function Historial() {
 
   return (
     <>
-      <EditForm
-        open={modalVisible}
-        onClose={() => setModalVisible(false)}
-        selectedAnimal={selectedAnimal}
-        onRefresh={onRefresh}
-        isRefreshing={isRefreshing}
-      />
       <ScrollView
         contentContainerStyle={tailwind(
           "flex bg-white justify-start items-center py-4"
@@ -161,27 +153,25 @@ export default function Historial() {
                 <DataTable.Header>
                   <DataTable.Title>Orden</DataTable.Title>
                   <DataTable.Title>Animal</DataTable.Title>
-                  <DataTable.Title>Comentario</DataTable.Title>
                 </DataTable.Header>
-                {animals?.map((animal, index) => (
+                {animals?.reverse()?.map((animal, index) => (
                   <TouchableOpacity
-                    key={`${animal.code}-${index}`}
+                    key={`${animal.code}-${animals.length - index}`}
                     onLongPress={() => {
                       deleteAnimal(index);
                       onRefresh();
-                    }}
+                    } }
                     delayLongPress={3000}
                   >
                     <DataTable.Row>
                       <DataTable.Cell>
-                        <Text>{index + 1}</Text>
+                        <Text>{animals.length - index}</Text>
                       </DataTable.Cell>
                       <DataTable.Cell>
                         {animal.code || "---"} ({animal.sex}) {animal.letter}
                         {animal.number.substring(0, 3)}{" "}
-                        {animal.number.substring(3, 4)}
+                        {animal.number.substring(3, 4)} {animal.comment}
                       </DataTable.Cell>
-                      <DataTable.Cell>{animal.comment}</DataTable.Cell>
                     </DataTable.Row>
                   </TouchableOpacity>
                 ))}
